@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexora - Simulador i Anàlisi de Capacitat Logística</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --secondary: #0f172a;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --text: #334155;
+            --text-muted: #64748b;
+            --success: #16a34a;
+            --success-bg: #dcfce7;
+            --danger: #dc2626;
+            --danger-bg: #fee2e2;
+            --warning: #d97706;
+            --warning-bg: #fef3c7;
+            --accent: #8b5cf6;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            color: white;
+            padding: 24px 32px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        header p {
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+
+        .badge {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 1024px) {
+            .grid-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 24px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 2px solid var(--bg);
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .input-wrapper input[type="number"] {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            color: var(--secondary);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-wrapper input[type="number"]:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        .input-suffix {
+            position: absolute;
+            right: 12px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .alt-card {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 16px;
+            transition: all 0.2s;
+            background-color: #fff;
+        }
+
+        .alt-card.active {
+            border-color: var(--primary-light);
+            background-color: #eff6ff;
+        }
+
+        .alt-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .alt-header input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-top: 3px;
+            cursor: pointer;
+            accent-color: var(--primary-light);
+        }
+
+        .alt-info {
+            flex: 1;
+        }
+
+        .alt-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--secondary);
+        }
+
+        .alt-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .alt-params {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background-color: var(--primary-light);
+        }
+
+        .kpi-card.status-ok::before { background-color: var(--success); }
+        .kpi-card.status-ko::before { background-color: var(--danger); }
+        .kpi-card.status-warning::before { background-color: var(--warning); }
+
+        .kpi-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .kpi-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin: 6px 0 2px 0;
+        }
+
+        .kpi-subtext {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .status-banner {
+            padding: 16px 20px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            font-weight: 600;
+        }
+
+        .status-banner.ok {
+            background-color: var(--success-bg);
+            color: var(--success);
+            border: 1px solid #bbf7d0;
+        }
+
+        .status-banner.ko {
+            background-color: var(--danger-bg);
+            color: var(--danger);
+            border: 1px solid #fecaca;
+        }
+
+        /* SVG Chart Styles */
+        .chart-container {
+            margin-top: 10px;
+            margin-bottom: 30px;
+            background: #fff;
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .chart-row {
+            margin-bottom: 16px;
+        }
+
+        .chart-label-group {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .bar-bg {
+            height: 24px;
+            background-color: #f1f5f9;
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 0.4s ease, background-color 0.4s ease;
+        }
+
+        .bar-fill.ok { background-color: var(--primary-light); }
+        .bar-fill.ko { background-color: var(--danger); }
+        .bar-fill.effective { background-color: var(--secondary); }
+
+        .target-line-container {
+            position: relative;
+            height: 20px;
+            margin-top: -10px;
+            margin-bottom: 10px;
+            pointer-events: none;
+        }
+
+        .target-line {
+            position: absolute;
+            top: -160px;
+            bottom: 0;
+            width: 2px;
+            background-color: var(--danger);
+            border-left: 2px dashed var(--danger);
+            z-index: 10;
+        }
+
+        .target-label {
+            position: absolute;
+            top: -185px;
+            transform: translateX(-50%);
+            background: var(--danger);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            white-space: nowrap;
+            z-index: 11;
+        }
+
+        /* Table Styles */
+        .table-responsive {
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        th, td {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background-color: #f1f5f9;
+            color: var(--secondary);
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        tr:hover {
+            background-color: #f8fafc;
+        }
+
+        tr.best-option {
+            background-color: #f0fdf4;
+            font-weight: 600;
+        }
+
+        tr.best-option td {
+            border-bottom: 2px solid var(--success);
+        }
+
+        .badge-table {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-ok { background: var(--success-bg); color: var(--success); }
+        .badge-ko { background: var(--danger-bg); color: var(--danger); }
+        .badge-best { background: #dbeafe; color: var(--primary-light); border: 1px solid #bfdbfe; }
+
+        .explanation-card {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: var(--radius);
+            padding: 20px;
+            color: #0369a1;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .explanation-card h3 {
+            color: #0c4a6e;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .explanation-card ul {
+            margin-left: 20px;
+            margin-top: 8px;
+        }
+
+        .explanation-card li {
+            margin-bottom: 4px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div>
+            <h1>Nexora — Anàlisi de Capacitat Logística</h1>
+            <p>Centre Logístic de Madrid | Plataforma d'Avaluació de Comandes i Escenaris</p>
+        </div>
+        <div class="badge">Model Optimitzador v1.0</div>
+    </header>
+
+    <div class="grid-layout">
+        <!-- SECCIÓ DE CONTROL I DADES D'ENTRADA -->
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+            <div class="card">
+                <div class="card-title">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    Paràmetres de Base
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="demandaActual">Demanda Actual</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="demandaActual" value="6000" min="0" step="100">
+                            <span class="input-suffix">cmd/dia</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="creixement">% Creixement</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="creixement" value="50" min="0" step="5">
+                            <span class="input-suffix">%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="operaris">Operaris Preparació</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="operaris" value="60" min="0">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="productivitat">Prod. Operari</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="productivitat" value="15" min="0">
+                            <span class="input-suffix">cmd/h</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="hores">Hores Prod. / Dia</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="hores" value="7" min="0" max="24" step="0.5">
+                            <span class="input-suffix">h</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="diesMes">Dies Activitat / Mes</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="diesMes" value="22" min="1" max="31">
+                            <span class="input-suffix">dies</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="capEmpaquetatge">Cap. Empaquetatge</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="capEmpaquetatge" value="7000" min="0" step="100">
+                            <span class="input-suffix">cmd/dia</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="capExpedicio">Cap. Expedició</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="capExpedicio" value="8000" min="0" step="100">
+                            <span class="input-suffix">cmd/dia</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ALTERNATIVES -->
+            <div class="card">
+                <div class="card-title">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                    Alternatives de Millora
+                </div>
+
+                <!-- Alt 1 -->
+                <div class="alt-card" id="card-alt1">
+                    <div class="alt-header" onclick="toggleAlt('alt1')">
+                        <input type="checkbox" id="alt1" onchange="calcular()">
+                        <div class="alt-info">
+                            <div class="alt-title">1. Contractació de Personal</div>
+                            <div class="alt-desc">Incrementa directament la capacitat de preparació.</div>
+                        </div>
+                    </div>
+                    <div class="alt-params">
+                        <div class="form-group" style="margin:0;">
+                            <label for="opAddicionals">Operaris Add.</label>
+                            <input type="number" id="opAddicionals" value="10" min="0" style="width:100%; padding:6px 10px; border:1px solid var(--border); border-radius:6px;">
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                            <label for="costOp">Cost/Operari</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="costOp" value="2200" min="0" style="width:100%; padding:6px 10px; border:1px solid var(--border); border-radius:6px;">
+                                <span class="input-suffix">€/m</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alt 2 -->
+                <div class="alt-card" id="card-alt2">
+                    <div class="alt-header" onclick="toggleAlt('alt2')">
+                        <input type="checkbox" id="alt2" onchange="calcular()">
+                        <div class="alt-info">
+                            <div class="alt-title">2. Inversió Tecnològica</div>
+                            <div class="alt-desc">+30% de productivitat en preparació de comandes.</div>
+                        </div>
+                    </div>
+                    <div class="alt-params">
+                        <div class="form-group" style="margin:0; grid-column: span 2;">
+                            <label for="costTech">Cost Mensual</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="costTech" value="15000" min="0" style="width:100%; padding:6px 10px; border:1px solid var(--border); border-radius:6px;">
+                                <span class="input-suffix">€/m</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alt 3 -->
+                <div class="alt-card" id="card-alt3">
+                    <div class="alt-header" onclick="toggleAlt('alt3')">
+                        <input type="checkbox" id="alt3" onchange="calcular()">
+                        <div class="alt-info">
+                            <div class="alt-title">3. Ampliació Instal·lacions</div>
+                            <div class="alt-desc">Eleva empaquetatge i expedició a 10.000 cmd/dia.</div>
+                        </div>
+                    </div>
+                    <div class="alt-params">
+                        <div class="form-group" style="margin:0; grid-column: span 2;">
+                            <label for="costAmpliacio">Cost Mensual</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="costAmpliacio" value="20000" min="0" style="width:100%; padding:6px 10px; border:1px solid var(--border); border-radius:6px;">
+                                <span class="input-suffix">€/m</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alt 4 -->
+                <div class="alt-card" id="card-alt4">
+                    <div class="alt-header" onclick="toggleAlt('alt4')">
+                        <input type="checkbox" id="alt4" onchange="calcular()">
+                        <div class="alt-info">
+                            <div class="alt-title">4. Segon Magatzem</div>
+                            <div class="alt-desc">Aporta +3.500 cmd/dia directes a la capacitat efectiva.</div>
+                        </div>
+                    </div>
+                    <div class="alt-params">
+                        <div class="form-group" style="margin:0; grid-column: span 2;">
+                            <label for="costMagatzem2">Cost Mensual</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="costMagatzem2" value="35000" min="0" style="width:100%; padding:6px 10px; border:1px solid var(--border); border-radius:6px;">
+                                <span class="input-suffix">€/m</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- SECCIÓ DE RESULTATS I ANÀLISI -->
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+
+            <!-- ESTAT RESULTAT -->
+            <div id="statusBanner" class="status-banner ok">
+                <span id="statusText">L'escenari compleix amb la demanda prevista.</span>
+                <span id="statusDiff" style="font-size: 0.9rem;">Excedent: +500 cmd/dia</span>
+            </div>
+
+            <!-- KPIS -->
+            <div class="kpi-grid">
+                <div class="kpi-card" id="kpi-cap-efectiva">
+                    <div class="kpi-label">Capacitat Efectiva</div>
+                    <div class="kpi-value" id="resCapEfectiva">0</div>
+                    <div class="kpi-subtext">comandes / dia</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Demanda Prevista</div>
+                    <div class="kpi-value" id="resDemandaPrevista">0</div>
+                    <div class="kpi-subtext" id="resUtilitzacio">Util: 0%</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Coll d'Ampolla</div>
+                    <div class="kpi-value" id="resCollAmpolla" style="font-size: 1.2rem; color: var(--danger);">---</div>
+                    <div class="kpi-subtext">Operació límit a Madrid</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Cost Mensual Addicional</div>
+                    <div class="kpi-value" id="resCostMensual">0 €</div>
+                    <div class="kpi-subtext" id="resCostComanda">0,00 € / comanda</div>
+                </div>
+            </div>
+
+            <!-- VISUALITZACIÓ DE BARRES -->
+            <div class="card">
+                <div class="card-title">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    Capacitats per Operació i Comparació de Demanda
+                </div>
+
+                <div class="chart-container" id="chartContainer">
+                    <!-- Preparació -->
+                    <div class="chart-row">
+                        <div class="chart-label-group">
+                            <span>Preparació de Comandes</span>
+                            <span id="chartValPrep">0 cmd/dia</span>
+                        </div>
+                        <div class="bar-bg">
+                            <div id="barPrep" class="bar-fill ok" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Empaquetatge -->
+                    <div class="chart-row">
+                        <div class="chart-label-group">
+                            <span>Empaquetatge</span>
+                            <span id="chartValEmp">0 cmd/dia</span>
+                        </div>
+                        <div class="bar-bg">
+                            <div id="barEmp" class="bar-fill ok" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Expedició -->
+                    <div class="chart-row">
+                        <div class="chart-label-group">
+                            <span>Expedició</span>
+                            <span id="chartValExp">0 cmd/dia</span>
+                        </div>
+                        <div class="bar-bg">
+                            <div id="barExp" class="bar-fill ok" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Capacitat Efectiva Total -->
+                    <div class="chart-row" style="margin-top: 24px; padding-top: 12px; border-top: 1px dashed var(--border);">
+                        <div class="chart-label-group">
+                            <span style="color: var(--secondary);">CAPACITAT EFECTIVA TOTAL (inclou 2n Magatzem)</span>
+                            <span id="chartValEf" style="color: var(--secondary);">0 cmd/dia</span>
+                        </div>
+                        <div class="bar-bg">
+                            <div id="barEf" class="bar-fill effective" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Línia Objectiu Demanda -->
+                    <div class="target-line-container">
+                        <div id="targetLine" class="target-line" style="left: 0%;">
+                            <div class="target-label" id="targetLabel">Demanda: 9.000</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAULA COMPARATIVA DE COMBINACIONS -->
+            <div class="card">
+                <div class="card-title">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    Matriu Comparativa de les 8 Combinacions d'Alternatives
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
+                    Per a la contractació de personal (Alt. 1), el simulador calcula automàticament el <strong>nombre mínim d'operaris addicionals</strong> requerits per cobrir la demanda en cada combinació d'altres decisions.
+                </p>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Combinació / Decisió</th>
+                                <th>Op. Addicionals</th>
+                                <th>Capacitat Efectiva</th>
+                                <th>Estat</th>
+                                <th>Cost Mensual (€)</th>
+                                <th>Cost / Comanda (€)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="matrixTableBody">
+                            <!-- Inserit dinàmicament per JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- EXPLICACIÓ I INSTRUCCIONS -->
+            <div class="explanation-card">
+                <h3>Com utilitzar aquesta eina d'anàlisi logística:</h3>
+                <ul>
+                    <li><strong>Ajust d'Entrades:</strong> Modifica la demanda inicial, el creixement previst i les velocitats o recursos de cada procés a la columna esquerra. Tots els càlculs i el gràfic s'actualitzaran automàticament en temps real.</li>
+                    <li><strong>Avaluació d'Escenaris:</strong> Activa o desactiva les 4 alternatives principals mitjançant les caselles de verificació per simular la millor decisió executiva.</li>
+                    <li><strong>Gràfic de Barres:</strong> La línia vermella discontínua representa el nivell de demanda previst. Les barres de procés que no arribin a aquesta marca es destacaran en color vermell per alertar del coll d'ampolla.</li>
+                    <li><strong>Optimització de Costos:</strong> Revisa la taula comparativa per trobar l'opció destacada com a <em>Més Econòmica Factible</em>, la qual calcula exactament quants operaris cal contractar de forma optimitzada per reduir despeses.</li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // Format de números en català/Espanya
+    function formatNum(val, decimals = 0) {
+        return new Intl.NumberFormat('ca-ES', {
+            maximumFractionDigits: decimals,
+            minimumFractionDigits: decimals
+        }).format(val);
+    }
+
+    function formatEuro(val) {
+        return new Intl.NumberFormat('ca-ES', {
+            style: 'currency',
+            currency: 'EUR',
+            maximumFractionDigits: 2
+        }).format(val);
+    }
+
+    function toggleAlt(id) {
+        const check = document.getElementById(id);
+        const card = document.getElementById('card-' + id);
+        // Si el click no ha vingut directament del checkbox, el canviem
+        if (event && event.target.tagName !== 'INPUT') {
+            check.checked = !check.checked;
+        }
+        if (check.checked) {
+            card.classList.add('active');
+        } else {
+            card.classList.remove('active');
+        }
+        calcular();
+    }
+
+    // Assignar esdeveniments d'escolta a tots els inputs
+    document.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', calcular);
+        input.addEventListener('change', calcular);
+    });
+
+    function calcular() {
+        // 1. Obtenir Dades d'Entrada
+        const demandaActual = parseFloat(document.getElementById('demandaActual').value) || 0;
+        const pctCreixement = parseFloat(document.getElementById('creixement').value) || 0;
+        const operarisBase = parseFloat(document.getElementById('operaris').value) || 0;
+        const prodBase = parseFloat(document.getElementById('productivitat').value) || 0;
+        const hores = parseFloat(document.getElementById('hores').value) || 0;
+        const capEmpBase = parseFloat(document.getElementById('capEmpaquetatge').value) || 0;
+        const capExpBase = parseFloat(document.getElementById('capExpedicio').value) || 0;
+        const diesMes = parseFloat(document.getElementById('diesMes').value) || 1;
+
+        // Alternatives
+        const alt1Active = document.getElementById('alt1').checked;
+        const opAdd = alt1Active ? (parseFloat(document.getElementById('opAddicionals').value) || 0) : 0;
+        const costOp = parseFloat(document.getElementById('costOp').value) || 0;
+
+        const alt2Active = document.getElementById('alt2').checked;
+        const costTech = parseFloat(document.getElementById('costTech').value) || 0;
+
+        const alt3Active = document.getElementById('alt3').checked;
+        const costAmpliacio = parseFloat(document.getElementById('costAmpliacio').value) || 0;
+
+        const alt4Active = document.getElementById('alt4').checked;
+        const costMagatzem2 = parseFloat(document.getElementById('costMagatzem2').value) || 0;
+
+        // 2. Càlculs Primaris
+        const demandaPrevista = demandaActual * (1 + pctCreixement / 100);
+
+        // Productivitat preparació (Inversió tecnològica augmenta un 30%)
+        const factorProd = alt2Active ? 1.30 : 1.0;
+        const prodEfectivaOp = prodBase * factorProd;
+
+        const totalOperaris = operarisBase + opAdd;
+        const capPreparacio = totalOperaris * prodEfectivaOp * hores;
+
+        // Capacitats d'empaquetatge i expedició
+        const capEmpaquetatge = alt3Active ? 10000 : capEmpBase;
+        const capExpedicio = alt3Active ? 10000 : capExpBase;
+
+        // Coll d'ampolla a Madrid (mínim de les 3 operacions a Madrid)
+        const capMadrid = Math.min(capPreparacio, capEmpaquetatge, capExpedicio);
+
+        let collAmpolla = "";
+        if (capMadrid === capPreparacio) collAmpolla = "Preparació";
+        else if (capMadrid === capEmpaquetatge) collAmpolla = "Empaquetatge";
+        else collAmpolla = "Expedició";
+
+        // Segon Magatzem
+        const capMagatzem2 = alt4Active ? 3500 : 0;
+
+        // Capacitat Efectiva Total
+        const capEfectivaTotal = capMadrid + capMagatzem2;
+
+        // Financials
+        const costMensualTotal = (alt1Active ? (opAdd * costOp) : 0) +
+                                  (alt2Active ? costTech : 0) +
+                                  (alt3Active ? costAmpliacio : 0) +
+                                  (alt4Active ? costMagatzem2 : 0);
+
+        const comandesMensualsPrevistes = demandaPrevista * diesMes;
+        const costPerComanda = comandesMensualsPrevistes > 0 ? (costMensualTotal / comandesMensualsPrevistes) : 0;
+
+        const utilitzacio = demandaPrevista > 0 ? ((demandaPrevista / capEfectivaTotal) * 100) : 0;
+        const difDemanda = capEfectivaTotal - demandaPrevista;
+
+        // 3. Actualitzar Interfície KPI
+        document.getElementById('resCapEfectiva').innerText = formatNum(capEfectivaTotal);
+        document.getElementById('resDemandaPrevista').innerText = formatNum(demandaPrevista);
+        document.getElementById('resUtilitzacio').innerText = "Ús: " + formatNum(utilitzacio, 1) + "%";
+        document.getElementById('resCollAmpolla').innerText = collAmpolla;
+        document.getElementById('resCostMensual').innerText = formatEuro(costMensualTotal);
+        document.getElementById('resCostComanda').innerText = formatEuro(costPerComanda) + " / comanda";
+
+        // Banner d'Estat
+        const banner = document.getElementById('statusBanner');
+        const statusText = document.getElementById('statusText');
+        const statusDiff = document.getElementById('statusDiff');
+        const kpiCardCap = document.getElementById('kpi-cap-efectiva');
+
+        if (difDemanda >= 0) {
+            banner.className = "status-banner ok";
+            statusText.innerText = "L'escenari actual COMPLEIX la demanda prevista.";
+            statusDiff.innerText = "Excedent: +" + formatNum(difDemanda) + " comandes/dia";
+            kpiCardCap.className = "kpi-card status-ok";
+        } else {
+            banner.className = "status-banner ko";
+            statusText.innerText = "L'escenari actual NO COMPLEIX la demanda prevista.";
+            statusDiff.innerText = "Dèficit: " + formatNum(difDemanda) + " comandes/dia";
+            kpiCardCap.className = "kpi-card status-ko";
+        }
+
+        // 4. Actualitzar Gràfic Visual (Escala basada en el valor màxim)
+        const maxValChart = Math.max(capPreparacio, capEmpaquetatge, capExpedicio, capEfectivaTotal, demandaPrevista) * 1.15;
+
+        const getPct = (val) => Math.min(100, Math.max(0, (val / maxValChart) * 100));
+
+        // Preparació
+        const barPrep = document.getElementById('barPrep');
+        barPrep.style.width = getPct(capPreparacio) + "%";
+        barPrep.className = "bar-fill " + (capPreparacio >= demandaPrevista ? "ok" : "ko");
+        document.getElementById('chartValPrep').innerText = formatNum(capPreparacio) + " cmd/dia";
+
+        // Empaquetatge
+        const barEmp = document.getElementById('barEmp');
+        barEmp.style.width = getPct(capEmpaquetatge) + "%";
+        barEmp.className = "bar-fill " + (capEmpaquetatge >= demandaPrevista ? "ok" : "ko");
+        document.getElementById('chartValEmp').innerText = formatNum(capEmpaquetatge) + " cmd/dia";
+
+        // Expedició
+        const barExp = document.getElementById('barExp');
+        barExp.style.width = getPct(capExpedicio) + "%";
+        barExp.className = "bar-fill " + (capExpedicio >= demandaPrevista ? "ok" : "ko");
+        document.getElementById('chartValExp').innerText = formatNum(capExpedicio) + " cmd/dia";
+
+        // Efectiva Total
+        const barEf = document.getElementById('barEf');
+        barEf.style.width = getPct(capEfectivaTotal) + "%";
+        barEf.className = "bar-fill " + (capEfectivaTotal >= demandaPrevista ? "effective" : "ko");
+        document.getElementById('chartValEf').innerText = formatNum(capEfectivaTotal) + " cmd/dia";
+
+        // Línia Target
+        const targetPct = getPct(demandaPrevista);
+        document.getElementById('targetLine').style.left = targetPct + "%";
+        document.getElementById('targetLabel').innerText = "Objectiu: " + formatNum(demandaPrevista);
+
+        // 5. Construir Taula de Combinacions
+        generarTaulaCombinacions(demandaPrevista, operarisBase, prodBase, hores, capEmpBase, capExpBase, costOp, costTech, costAmpliacio, costMagatzem2, diesMes);
+    }
+
+    function generarTaulaCombinacions(demandaTarget, opBase, prodBase, hores, empBase, expBase, costOp, costTech, costAmpliacio, costMagatzem2, diesMes) {
+        const tbody = document.getElementById('matrixTableBody');
+        tbody.innerHTML = "";
+
+        // Generar 8 combinacions de les alternatives 2, 3 i 4 (Inversió Tech, Ampliació, 2n Magatzem)
+        // L'Alternativa 1 (Operaris) es calcula automàticament per trobar el mínim d'operaris addicionals per ser factible.
+        const combinacions = [];
+
+        for (let t = 0; t <= 1; t++) { // Tech
+            for (let a = 0; a <= 1; a++) { // Ampliació
+                for (let m = 0; m <= 1; m++) { // Magatzem 2
+                    const altTech = t === 1;
+                    const altAmp = a === 1;
+                    const altMag2 = m === 1;
+
+                    // Capacitat Empaquetatge i Expedició
+                    const cEmp = altAmp ? 10000 : empBase;
+                    const cExp = altAmp ? 10000 : expBase;
+                    const cMag2 = altMag2 ? 3500 : 0;
+
+                    // Requeriment de capacitat que ha de donar Preparació a Madrid
+                    // demandaTarget <= Math.min(cPrep, cEmp, cExp) + cMag2
+                    const capMadridRequerida = demandaTarget - cMag2;
+
+                    // Si cEmp o cExp són inferiors a la capacitat requerida a Madrid, 
+                    // la combinació NO podrà ser factible només afegint operaris de preparació.
+                    const maxMadridPossible = Math.min(cEmp, cExp);
+
+                    const factorProd = altTech ? 1.30 : 1.0;
+                    const prodOp = prodBase * factorProd;
+                    const capPerOp = prodOp * hores;
+
+                    let opAddMin = 0;
+                    let esFactible = false;
+
+                    if (maxMadridPossible >= capMadridRequerida) {
+                        // Podem cobrir la demanda afegint operaris
+                        const capPrepNecessaria = capMadridRequerida;
+                        const capPrepActual = opBase * capPerOp;
+                        const capFaltant = capPrepNecessaria - capPrepActual;
+
+                        if (capFaltant <= 0) {
+                            opAddMin = 0;
+                        } else {
+                            opAddMin = Math.ceil(capFaltant / capPerOp);
+                        }
+                        esFactible = true;
+                    } else {
+                        // Encara que tinguem operaris infinit, empaquetatge o expedició fan de coll d'ampolla insuperable
+                        opAddMin = 0; // Indicador que no s'assoleix
+                        esFactible = false;
+                    }
+
+                    // Re-calculem valors reals amb opAddMin
+                    const totalOp = opBase + opAddMin;
+                    const cPrepReal = totalOp * capPerOp;
+                    const capMadridReal = Math.min(cPrepReal, cEmp, cExp);
+                    const capEfectivaReal = capMadridReal + cMag2;
+
+                    const factibleReal = esFactible && (capEfectivaReal >= demandaTarget);
+
+                    const costMensual = (opAddMin * costOp) +
+                                        (altTech ? costTech : 0) +
+                                        (altAmp ? costAmpliacio : 0) +
+                                        (altMag2 ? costMagatzem2 : 0);
+
+                    const comandesMensuals = demandaTarget * diesMes;
+                    const costComanda = comandesMensuals > 0 ? (costMensual / comandesMensuals) : 0;
+
+                    // Nom descriptiu de la combinació
+                    let nomCombo = [];
+                    if (altTech) nomCombo.push("Tech (+30%)");
+                    if (altAmp) nomCombo.push("Ampliació (10k)");
+                    if (altMag2) nomCombo.push("2n Magatzem (+3.5k)");
+                    if (nomCombo.length === 0) nomCombo.push("Només Personal");
+
+                    combinacions.push({
+                        nom: nomCombo.join(" + "),
+                        opAdd: opAddMin,
+                        capEfectiva: capEfectivaReal,
+                        factible: factibleReal,
+                        costMensual: costMensual,
+                        costComanda: costComanda,
+                        altTech, altAmp, altMag2
+                    });
+                }
+            }
+        }
+
+        // Trobar la combinació factible més econòmica
+        let minCost = Infinity;
+        let millorIndex = -1;
+
+        combinacions.forEach((c, idx) => {
+            if (c.factible && c.costMensual < minCost) {
+                minCost = c.costMensual;
+                millorIndex = idx;
+            }
+        });
+
+        // Renderitzar taula
+        combinacions.forEach((c, idx) => {
+            const tr = document.createElement('tr');
+            if (idx === millorIndex) {
+                tr.className = "best-option";
+            }
+
+            const tdNom = document.createElement('td');
+            tdNom.innerHTML = `<strong>${c.nom}</strong>` + (idx === millorIndex ? ' <span class="badge-table badge-best">Més Econòmica</span>' : '');
+
+            const tdOp = document.createElement('td');
+            tdOp.innerText = c.factible ? `+${c.opAdd} op. (${opBase + c.opAdd} totals)` : "N/A (Límit instal·lacions)";
+
+            const tdCap = document.createElement('td');
+            tdCap.innerText = formatNum(c.capEfectiva) + " cmd/dia";
+
+            const tdEstat = document.createElement('td');
+            tdEstat.innerHTML = c.factible ? 
+                '<span class="badge-table badge-ok">FACTIBLE</span>' : 
+                '<span class="badge-table badge-ko">NO FACTIBLE</span>';
+
+            const tdCost = document.createElement('td');
+            tdCost.innerText = formatEuro(c.costMensual);
+
+            const tdCostCmd = document.createElement('td');
+            tdCostCmd.innerText = formatEuro(c.costComanda);
+
+            tr.appendChild(tdNom);
+            tr.appendChild(tdOp);
+            tr.appendChild(tdCap);
+            tr.appendChild(tdEstat);
+            tr.appendChild(tdCost);
+            tr.appendChild(tdCostCmd);
+
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Inicialitzar càlculs a la càrrega
+    window.onload = function() {
+        // Sincronitzar selecció inicial de targetes
+        ['alt1', 'alt2', 'alt3', 'alt4'].forEach(id => {
+            if(document.getElementById(id).checked) {
+                document.getElementById('card-' + id).classList.add('active');
+            }
+        });
+        calcular();
+    };
+</script>
+
+</body>
+</html>
